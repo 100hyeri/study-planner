@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Music, Volume2, VolumeX, Search, Play, Pause, SkipBack, SkipForward, X, XCircle } from 'lucide-react';
+import { Music, Volume2, VolumeX, Search, Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
 import { searchYoutubeVideos } from '../../api/youtubeApi'; 
 
 const MusicPlayer = ({ isGoalMode }) => {
@@ -140,7 +140,6 @@ const MusicPlayer = ({ isGoalMode }) => {
     return `${min}:${sec < 10 ? '0' : ''}${sec}`;
   };
 
-  // [Theme Update] Goal: Deep Black & Blue Accent
   const containerClass = isGoalMode ? 'bg-[#1C1C1E] border-gray-800 shadow-lg' : 'bg-white border-gray-100 shadow-sm';
   const textClass = isGoalMode ? 'text-white' : 'text-gray-800';
   const iconClass = isGoalMode ? 'text-[#3B82F6]' : 'text-indigo-600';
@@ -152,7 +151,8 @@ const MusicPlayer = ({ isGoalMode }) => {
     <div className={`${containerClass} rounded-lg p-3 border shrink-0 w-full relative transition-all duration-500`}>
       
       <div className="flex items-center gap-2 mb-2">
-        <h3 className={`font-extrabold text-xs tracking-tight ${textClass}`}>TODAY'S BGM</h3>
+        {/* [한글] 헤더 */}
+        <h3 className={`font-extrabold text-xs tracking-tight ${textClass}`}>오늘의 음악</h3>
         <Music size={12} className={iconClass} />
         <div className="flex items-center gap-1 ml-1">
           <button onClick={toggleMute} className={`${subTextClass} hover:text-white focus:outline-none`}>

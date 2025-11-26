@@ -23,3 +23,20 @@ export const registerUser = async (userData) => {
     return { message: '서버와 연결할 수 없습니다.' };
   }
 };
+
+// [New] 회원정보 수정 API
+export const updateUserInfo = async (id, nickname, password) => {
+  try {
+    const body = { id, nickname };
+    if (password) body.password = password;
+
+    const res = await fetch(`${BASE_URL}/update`, {
+      method: 'PUT', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  } catch (err) {
+    return { message: '수정 실패' };
+  }
+};

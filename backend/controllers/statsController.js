@@ -1,31 +1,55 @@
 const pool = require('../config/db');
 
-// 1. 주간/월간 통계 조회
+// 1. 통계 조회 (주간: 일별 / 월간: 월별)
 exports.getStats = async (req, res) => {
   try {
     const userId = req.query.userId || 1; 
-    const period = req.query.period || '7'; 
-    const days = parseInt(period, 10);
+    const type = req.query.period || 'weekly'; // 'weekly' or 'monthly'
 
-    const sql = `
-      SELECT 
-        DATE_FORMAT(study_date, '%Y-%m-%d') as date, 
-        study_seconds,
-        goal_achieved
-      FROM study_stats 
-      WHERE user_id = ? 
-      AND study_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-      ORDER BY study_date ASC
-    `;
-    const [rows] = await pool.query(sql, [userId, days - 1]);
+    let sql = '';
+    let params = [];
+
+    if (type === 'monthly') {
+      // [월간] 최근 6개월간의 '월별' 합계
+      sql = `
+        SELECT 
+          DATE_FORMAT(study_date, '%Y-%m') as date, 
+          SUM(study_seconds) as study_seconds
+        FROM study_stats 
+        WHERE user_id = ? 
+        AND study_date >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)
+        GROUP BY DATE_FORMAT(study_date, '%Y-%m')
+        ORDER BY date ASC
+      `;
+      params = [userId];
+    } else {
+      // [주간] 최근 7일간의 '일별' 기록 (기본값)
+      sql = `
+        SELECT 
+          DATE_FORMAT(study_date, '%Y-%m-%d') as date, 
+          study_seconds,
+          goal_achieved
+        FROM study_stats 
+        WHERE user_id = ? 
+        AND study_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+        ORDER BY study_date ASC
+      `;
+      params = [userId];
+    }
+
+    const [rows] = await pool.query(sql, params);
     
     const stats = rows.map(row => ({
+      // 월간일 경우 '2023-11', 주간일 경우 '2023-11-27' 형식
       date: row.date,
       minutes: Math.round(row.study_seconds / 60),
-      isSuccess: row.goal_achieved === 1
+      // 월간은 목표 달성 여부 대신 공부량 자체에 집중 (색상 로직을 위해 true 처리 or 별도 로직)
+      isSuccess: type === 'monthly' ? row.study_seconds > 0 : row.goal_achieved === 1
     }));
+    
     res.json(stats);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: '통계 로딩 실패' });
   }
 };
@@ -34,8 +58,12 @@ exports.getStats = async (req, res) => {
 exports.getCategoryStats = async (req, res) => {
   try {
     const userId = req.query.userId || 1;
-    const period = req.query.period || '7';
-    const days = parseInt(period, 10);
+    const type = req.query.period || 'weekly';
+    
+    // 주간이면 7일, 월간이면 30일(최근 한달) 기준 카테고리 분석
+    // 사용자가 "이번 달, 저번 달" 그래프를 보면서 파이 차트는 '최근 트렌드'를 보길 원할 수 있음.
+    // 여기서는 'Monthly' 선택 시 최근 30일 데이터를 보여주도록 설정 (가장 일반적)
+    const days = type === 'monthly' ? 30 : 7;
 
     const sql = `
       SELECT category, COUNT(*) as count
@@ -52,7 +80,8 @@ exports.getCategoryStats = async (req, res) => {
   }
 };
 
-// 3. [NEW] 목표 이력 조회
+// ... (나머지 함수들은 기존과 동일)
+// 3. 목표 이력 조회
 exports.getGoalHistory = async (req, res) => {
   try {
     const userId = req.query.userId || 1;
@@ -66,11 +95,10 @@ exports.getGoalHistory = async (req, res) => {
   }
 };
 
-// 4. [NEW] 목표 생성 (목표 모드 진입 시)
+// 4. 목표 생성
 exports.createGoal = async (req, res) => {
   try {
     const { userId, title, dDay } = req.body;
-    // 종료일 계산 (오늘 + dDay)
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + parseInt(dDay));
     
@@ -85,7 +113,31 @@ exports.createGoal = async (req, res) => {
   }
 };
 
-// 기존 함수들 유지
+// 5. 목표 상태 업데이트
+exports.updateGoalStatus = async (req, res) => {
+  try {
+    const { userId, status } = req.body;
+    const [rows] = await pool.query(
+      'SELECT id FROM goal_history WHERE user_id = ? AND status = "ongoing" ORDER BY created_at DESC LIMIT 1',
+      [userId]
+    );
+
+    if (rows.length > 0) {
+      const goalId = rows[0].id;
+      await pool.query(
+        'UPDATE goal_history SET status = ? WHERE id = ?',
+        [status, goalId]
+      );
+      res.json({ message: `목표 ${status} 처리 완료` });
+    } else {
+      res.status(404).json({ message: '진행 중인 목표가 없습니다.' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '상태 업데이트 실패' });
+  }
+};
+
 exports.getTodayStudyTime = async (req, res) => {
   try {
     const userId = req.query.userId || 1;

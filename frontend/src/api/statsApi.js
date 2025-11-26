@@ -1,12 +1,9 @@
 const BASE_URL = 'http://localhost:8080/api/stats';
 
-// 1. 기간별 학습 활동 기록 (Period: 'week' | 'month')
-// 실제로는 일수(7 or 30)를 숫자로 보내거나 쿼리 파라미터로 처리
-export const getWeeklyStats = async (userId, period = 7) => {
+// [수정] period: 'weekly' | 'monthly'
+export const getWeeklyStats = async (userId, period = 'weekly') => {
   try {
-    // period가 숫자가 아니라면 기본값 7로 처리 (안전장치)
-    const days = typeof period === 'number' ? period : 7;
-    const response = await fetch(`${BASE_URL}?userId=${userId}&period=${days}`);
+    const response = await fetch(`${BASE_URL}?userId=${userId}&period=${period}`);
     if (!response.ok) throw new Error('데이터 로딩 실패');
     return await response.json();
   } catch (error) {
@@ -15,11 +12,10 @@ export const getWeeklyStats = async (userId, period = 7) => {
   }
 };
 
-// 2. 기간별 카테고리 통계
-export const getCategoryStats = async (userId, period = 7) => {
+// [수정] period: 'weekly' | 'monthly'
+export const getCategoryStats = async (userId, period = 'weekly') => {
   try {
-    const days = typeof period === 'number' ? period : 7;
-    const response = await fetch(`${BASE_URL}/category?userId=${userId}&period=${days}`);
+    const response = await fetch(`${BASE_URL}/category?userId=${userId}&period=${period}`);
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
@@ -27,7 +23,7 @@ export const getCategoryStats = async (userId, period = 7) => {
   }
 };
 
-// 3. 목표 이력
+// ... (이하 기존 코드와 동일)
 export const getGoalHistory = async (userId) => {
   try {
     const response = await fetch(`${BASE_URL}/goals?userId=${userId}`);
@@ -36,7 +32,6 @@ export const getGoalHistory = async (userId) => {
   } catch (error) { return []; }
 };
 
-// 4. 목표 생성
 export const createGoal = async (userId, title, dDay) => {
   try {
     await fetch(`${BASE_URL}/goals`, {
@@ -47,7 +42,16 @@ export const createGoal = async (userId, title, dDay) => {
   } catch (error) { console.error("목표 생성 실패", error); }
 };
 
-// 5. 오늘 공부 시간 (타이머용)
+export const updateGoalStatus = async (userId, status) => {
+  try {
+    await fetch(`${BASE_URL}/goals/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, status })
+    });
+  } catch (error) { console.error("목표 상태 업데이트 실패", error); }
+};
+
 export const getTodayStudyTime = async (userId) => {
   try {
     const response = await fetch(`${BASE_URL}/today?userId=${userId}`);
@@ -57,7 +61,6 @@ export const getTodayStudyTime = async (userId) => {
   } catch (error) { return 0; }
 };
 
-// 6. 공부 기록 저장
 export const saveStudyLog = async (userId, seconds) => {
   const today = new Date().toISOString().split('T')[0];
   try {
@@ -69,7 +72,6 @@ export const saveStudyLog = async (userId, seconds) => {
   } catch (error) { console.error('기록 저장 실패:', error); }
 };
 
-// 7. 목표 달성 여부 저장
 export const saveDailyGoal = async (userId, isAchieved) => {
   const today = new Date().toISOString().split('T')[0];
   try {
@@ -79,4 +81,34 @@ export const saveDailyGoal = async (userId, isAchieved) => {
       body: JSON.stringify({ userId, isAchieved, studyDate: today })
     });
   } catch (error) { console.error('목표 저장 실패:', error); }
+};
+
+// [NEW] 진행 중인 최신 목표 가져오기
+export const getOngoingGoal = async (userId) => {
+  try {
+    // 전체 이력을 가져와서
+    const response = await fetch(`${BASE_URL}/goals?userId=${userId}`);
+    if (!response.ok) return null;
+    const goals = await response.json();
+    
+    // 'ongoing' 상태인 목표 중 가장 최신 것 찾기
+    const ongoingGoal = goals.find(g => g.status === 'ongoing');
+    
+    if (ongoingGoal) {
+      // D-Day 계산
+      const today = new Date();
+      const endDate = new Date(ongoingGoal.end_date);
+      const diffTime = endDate - today;
+      const dDay = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      return {
+        title: ongoingGoal.title,
+        dDay: dDay
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("진행 중인 목표 로딩 실패", error);
+    return null;
+  }
 };

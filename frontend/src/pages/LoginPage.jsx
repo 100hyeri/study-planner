@@ -1,18 +1,5 @@
 import React, { useState } from 'react';
-// import { loginUser } from '../api/authApi'; // [실제 프로젝트] 이 줄의 주석을 풀고 아래 임시 loginUser 함수를 지우세요.
-
-// [미리보기용 임시 함수] 실제 프로젝트에서는 api/authApi.js 파일을 만들고 그 안의 함수를 불러와야 합니다.
-const loginUser = async (email, password) => {
-  // 실제 백엔드 통신 대신 0.5초 뒤에 성공 응답을 주는 가짜 함수입니다.
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ 
-        token: 'dummy-token', 
-        user: { nickname: '테스터', email: email } 
-      });
-    }, 500);
-  });
-};
+import { loginUser } from '../api/authApi';
 
 const LoginPage = ({ onLogin, onGoSignup }) => {
   const [email, setEmail] = useState('');
@@ -21,7 +8,8 @@ const LoginPage = ({ onLogin, onGoSignup }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = await loginUser(email, password);
-    if (data.token) {
+    
+    if (data.token && data.user) {
       alert(`${data.user.nickname}님 환영합니다!`);
       onLogin(data.user);
     } else {
@@ -29,34 +17,53 @@ const LoginPage = ({ onLogin, onGoSignup }) => {
     }
   };
 
+  // [Design] 일상 모드 테마 적용
+  const bgClass = "bg-gray-50";
+  const cardClass = "bg-white border border-gray-200 shadow-sm rounded-xl";
+  const inputClass = "w-full p-3.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition-all bg-white text-gray-900 placeholder-gray-400";
+  const btnClass = "w-full bg-gray-900 text-white p-3.5 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-md active:scale-[0.98]";
+
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm border border-gray-200">
-        <h1 className="text-3xl font-black text-center mb-8 text-gray-800 tracking-tight">PLANNER.</h1>
+    <div className={`h-screen flex items-center justify-center ${bgClass} transition-colors duration-500`}>
+      <div className={`${cardClass} p-8 w-full max-w-sm`}>
+        {/* 로고 */}
+        <h1 className="text-3xl font-black text-center mb-2 text-gray-900 tracking-wider">PLANNER.</h1>
+        <p className="text-center text-gray-500 text-xs mb-8 tracking-widest uppercase">Your Daily Mate</p>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input 
-            type="email" 
-            placeholder="이메일" 
-            className="w-full p-3 border rounded-lg focus:outline-none focus:border-indigo-500 text-sm" 
-            onChange={e=>setEmail(e.target.value)} 
-          />
-          <input 
-            type="password" 
-            placeholder="비밀번호" 
-            className="w-full p-3 border rounded-lg focus:outline-none focus:border-indigo-500 text-sm" 
-            onChange={e=>setPassword(e.target.value)} 
-          />
-          <button className="w-full bg-gray-900 text-white p-3 rounded-lg font-bold hover:bg-gray-800 transition-colors">
-            로그인
-          </button>
+          <div>
+            <input 
+              type="email" 
+              placeholder="이메일" 
+              className={inputClass}
+              onChange={e=>setEmail(e.target.value)} 
+            />
+          </div>
+          <div>
+            <input 
+              type="password" 
+              placeholder="비밀번호" 
+              className={inputClass}
+              onChange={e=>setPassword(e.target.value)} 
+            />
+          </div>
+          
+          <div className="pt-2">
+            <button className={btnClass}>
+              로그인
+            </button>
+          </div>
         </form>
-        <div className="mt-6 text-center">
-          <button onClick={onGoSignup} className="text-xs text-gray-500 hover:text-indigo-600 underline">
-            계정이 없으신가요? 회원가입
+
+        <div className="mt-6 text-center flex justify-center items-center gap-2 text-xs text-gray-500">
+          <span>계정이 없으신가요?</span>
+          <button onClick={onGoSignup} className="font-bold text-gray-900 hover:underline">
+            회원가입
           </button>
         </div>
       </div>
     </div>
   );
 };
+
 export default LoginPage;

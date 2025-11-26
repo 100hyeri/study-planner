@@ -32,9 +32,33 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.JWT_SECRET, { expiresIn: '12h' });
     
-    res.json({ message: '로그인 성공', token, user: { nickname: user.nickname, email: user.email } });
+    // [중요] id도 함께 반환하도록 수정됨
+    res.json({ message: '로그인 성공', token, user: { id: user.id, nickname: user.nickname, email: user.email } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '서버 에러 발생' });
+  }
+};
+
+// [New] 회원정보 수정 (이 부분이 없어서 에러가 났을 거예요)
+exports.updateUser = async (req, res) => {
+  try {
+    const { id, nickname, password } = req.body;
+    
+    // 1. 닉네임 변경
+    if (nickname) {
+      await pool.query('UPDATE users SET nickname = ? WHERE id = ?', [nickname, id]);
+    }
+
+    // 2. 비밀번호 변경 (입력된 경우만)
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, id]);
+    }
+
+    res.json({ message: '회원정보가 수정되었습니다.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '회원정보 수정 실패' });
   }
 };

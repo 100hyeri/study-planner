@@ -1,14 +1,14 @@
 const pool = require('../config/db');
 
-// 카테고리 자동 분류
+// [수정] 카테고리 자동 분류 (한글)
 const detectCategory = (text) => {
-  if (!text) return 'Etc'; 
+  if (!text) return '기타'; 
   const t = text.toLowerCase();
-  if (t.match(/공부|수학|영어|코딩|과제|시험|독서|강의|study|read|learn/)) return 'Study';
-  if (t.match(/운동|헬스|산책|걷기|요가|수영|gym|run|walk/)) return 'Exercise';
-  if (t.match(/밥|식사|점심|저녁|아침|간식|물|meal|food|eat/)) return 'Meal';
-  if (t.match(/휴식|잠|낮잠|멍|넷플릭스|게임|rest|sleep/)) return 'Rest';
-  return 'Etc';
+  if (t.match(/공부|수학|영어|코딩|과제|시험|독서|강의|study|read|learn/)) return '공부';
+  if (t.match(/운동|헬스|산책|걷기|요가|수영|gym|run|walk/)) return '운동';
+  if (t.match(/밥|식사|점심|저녁|아침|간식|물|meal|food|eat/)) return '식사';
+  if (t.match(/휴식|잠|낮잠|멍|넷플릭스|게임|rest|sleep/)) return '휴식';
+  return '기타';
 };
 
 // 1. 목록 조회
@@ -17,7 +17,6 @@ exports.getTodos = async (req, res) => {
     const userId = req.query.userId || 1;
     const date = req.query.date;
 
-    // [확인] content 컬럼을 조회하는지 확인
     const [rows] = await pool.query(
       'SELECT * FROM todos WHERE user_id = ? AND todo_date = ? ORDER BY id ASC',
       [userId, date]
@@ -35,7 +34,6 @@ exports.addTodo = async (req, res) => {
     const { userId, content, todoDate, category } = req.body;
     const finalCategory = category || detectCategory(content);
 
-    // [확인] content 컬럼에 저장하는지 확인
     const [result] = await pool.query(
       'INSERT INTO todos (user_id, content, category, todo_date) VALUES (?, ?, ?, ?)',
       [userId, content, finalCategory, todoDate]
