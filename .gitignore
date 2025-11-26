@@ -1,0 +1,20 @@
+1. 용량이 너무 큰 라이브러리 폴더 제외
+
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+2. 비밀번호가 들어있는 환경변수 파일 제외
+
+.env
+backend/.env
+frontend/.env
+
+3. 맥(Mac) 사용시 생기는 불필요한 파일
+
+.DS_Store
+
+4. 빌드 결과물 제외
+
+dist/
+build/

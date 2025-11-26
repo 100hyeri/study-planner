@@ -1,0 +1,40 @@
+const pool = require('../config/db');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+// 회원가입
+exports.register = async (req, res) => {
+  try {
+    const { email, password, nickname } = req.body;
+    const [exists] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (exists.length > 0) return res.status(400).json({ message: '이미 존재하는 이메일입니다.' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.query('INSERT INTO users (email, password, nickname) VALUES (?, ?, ?)', [email, hashedPassword, nickname]);
+    
+    res.status(201).json({ message: '회원가입 성공! 로그인해주세요.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 에러 발생' });
+  }
+};
+
+// 로그인
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (users.length === 0) return res.status(401).json({ message: '가입되지 않은 이메일입니다.' });
+
+    const user = users[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: '비밀번호가 틀렸습니다.' });
+
+    const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.JWT_SECRET, { expiresIn: '12h' });
+    
+    res.json({ message: '로그인 성공', token, user: { nickname: user.nickname, email: user.email } });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 에러 발생' });
+  }
+};
