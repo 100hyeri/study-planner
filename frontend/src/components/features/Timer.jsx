@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, ChevronUp, ChevronDown, Timer as TimerIcon } from 'lucide-react';
 import { saveStudyLog, getTodayStudyTime } from '../../api/statsApi'; 
 
-const Timer = ({ isGoalMode }) => {
+// [수정] userId를 props로 받음
+const Timer = ({ isGoalMode, userId }) => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   
@@ -53,13 +54,15 @@ const Timer = ({ isGoalMode }) => {
     if (isGoalMode) {
       setTime(getTotalTargetSeconds());
     } else {
-      getTodayStudyTime(1).then(seconds => {
-        setTime(seconds);
-        timeRef.current = seconds;
-        lastSavedTimeRef.current = seconds;
-      });
+      if (userId) {
+        getTodayStudyTime(userId).then(seconds => {
+          setTime(seconds);
+          timeRef.current = seconds;
+          lastSavedTimeRef.current = seconds;
+        });
+      }
     }
-  }, [isGoalMode]);
+  }, [isGoalMode, userId]); // userId 변경 시 실행
 
   useEffect(() => {
     if (isGoalMode && !isRunning) {
@@ -68,8 +71,8 @@ const Timer = ({ isGoalMode }) => {
   }, [targetH, targetM, targetS]);
 
   const saveCurrentSession = async () => {
-    if (isGoalMode) return; 
-    const userId = 1; 
+    if (isGoalMode || !userId) return; 
+    // [수정] const userId = 1 제거 -> props의 userId 사용
     const currentTime = timeRef.current;
     const sessionSeconds = currentTime - lastSavedTimeRef.current;
     if (sessionSeconds > 0) {
@@ -112,10 +115,6 @@ const Timer = ({ isGoalMode }) => {
   const inputWrapperClass = "flex flex-col items-center justify-center w-8";
   const arrowBtnClass = `p-0.5 rounded-full transition-colors ${isGoalMode ? 'text-gray-500 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100'}`;
   
-  // [수정] 
-  // 1. text-3xl: 폰트 크기 최적화 (잘림 방지)
-  // 2. py-1 leading-none: 상하 여백 확보 및 줄 간격 조정
-  // 3. [&::-webkit...]: 브라우저 기본 스핀 버튼(화살표) 제거
   const inputClass = `
     w-full text-3xl font-light font-mono text-center bg-transparent 
     focus:outline-none m-0 p-0 border-none py-1 leading-none

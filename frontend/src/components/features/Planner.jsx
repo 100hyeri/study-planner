@@ -3,8 +3,7 @@ import { Calendar, Check, X, ArrowRight, Triangle, Trash2 } from 'lucide-react';
 import { getTodos, addTodo, updateTodo, deleteTodo } from '../../api/todoApi';
 import { saveDailyGoal, updateGoalStatus } from '../../api/statsApi'; 
 
-// [수정] onGoalEnd prop 추가
-const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
+const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId }) => {
   const [todos, setTodos] = useState([]);
   const [inputText, setInputText] = useState('');
   const categories = ['공부', '운동', '식사', '휴식', '기타']; 
@@ -12,20 +11,20 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const dateString = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-  const userId = 1; 
-
+  
   useEffect(() => {
     const fetchTodos = async () => {
       try {
+        if (!userId) return; 
         const data = await getTodos(userId, dateString);
         setTodos(Array.isArray(data) ? data : []);
       } catch (e) { setTodos([]); }
     };
     fetchTodos();
-  }, [dateString]);
+  }, [dateString, userId]);
 
   const handleAddTodo = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !userId) return;
     try {
       const newTodo = await addTodo({ userId, content: inputText, category: null, todoDate: dateString });
       if (newTodo && newTodo.id) {
@@ -38,8 +37,28 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
   const handleStatusChange = async (id, newStatus) => {
     if (newStatus === 'move') {
       if (window.confirm('내일로 미루시겠습니까?')) {
-        await deleteTodo(id);
-        setTodos(todos.filter(t => t.id !== id));
+        // [수정] 단순히 삭제만 하던 로직 -> 내일 날짜로 복사 후 삭제하는 로직으로 변경
+        const todoToMove = todos.find(t => t.id === id);
+        if (todoToMove) {
+          // 1. 내일 날짜 계산
+          const nextDay = new Date(currentDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+          const nextDayString = new Date(nextDay.getTime() - (nextDay.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+          // 2. 내일 날짜로 할 일 추가
+          await addTodo({
+            userId,
+            content: todoToMove.content,
+            category: todoToMove.category,
+            todoDate: nextDayString
+          });
+
+          // 3. 오늘 목록에서 삭제
+          await deleteTodo(id);
+          setTodos(todos.filter(t => t.id !== id));
+          
+          alert('내일 목록으로 이동되었습니다.');
+        }
       }
     } else {
       await updateTodo(id, { status: newStatus });
@@ -59,37 +78,32 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
     setTodos(todos.filter(t => t.id !== id));
   };
 
-  // [수정] 마감/성공 핸들러
   const handleTodayClear = async () => {
     const total = todos.length;
     const doneCount = todos.filter(t => t.status === 'done').length;
     const percent = total === 0 ? 0 : Math.round((doneCount / total) * 100);
     
-    await saveDailyGoal(userId, percent >= 80);
+    if (userId) await saveDailyGoal(userId, percent >= 80);
     
     if (isGoalMode) {
       const currentDDay = parseInt(goalInfo.dDay);
 
-      // 1. D-Day(0) 도달 시: 목표 달성 및 일상 복귀
       if (currentDDay === 0) {
-        await updateGoalStatus(userId, 'success'); 
+        if (userId) await updateGoalStatus(userId, 'success'); 
         alert("목표를 달성하셨습니다! 정말 고생 많으셨어요 🎉");
-        // 일상 모드로 자동 전환
         if (onGoalEnd) onGoalEnd(); 
         return;
       } 
-      // 2. D-1 일 때: D-Day로 진입
       else if (currentDDay === 1) {
         if (onDecreaseDDay) onDecreaseDDay();
-        alert("여기까지 오시느라 정말 수고 많으셨어요. 오늘은 스스로를 믿어주세요");
+        alert("오늘이 바로 D-Day입니다.\n지금까지 준비하신 만큼 잘하실 거예요! 조심히 다녀오세요!");
       } 
-      // 3. 평소 진행
       else {
         if (onDecreaseDDay) onDecreaseDDay();
-        alert(`🎉 마감 완료! 달성률: ${percent}%\nD-Day가 1일 줄었습니다.`);
+        alert(`오늘 하루도 고생 많으셨습니다!\n달성률: ${percent}%\nD-Day가 1일 줄었습니다.`);
       }
     } else {
-      alert(`🎉 마감 완료! 달성률: ${percent}%`);
+      alert(`오늘 하루도 고생 많으셨습니다!\n달성률: ${percent}%`);
     }
     
     const next = new Date(currentDate);
@@ -97,7 +111,6 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
     setCurrentDate(next);
   };
 
-  // [수정] 헤더 텍스트 렌더링 함수
   const renderDDay = () => {
     if (mode === 'goal') {
       return parseInt(goalInfo.dDay) === 0 ? 'D-Day' : `D-${goalInfo.dDay}`;
@@ -105,7 +118,6 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
     return dateString;
   };
 
-  // [수정] 버튼 텍스트 렌더링 함수
   const getButtonText = () => {
     if (isGoalMode && parseInt(goalInfo.dDay) === 0) {
       return "목표 달성 / 일상 복귀";
@@ -113,7 +125,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
     return "하루 마감";
   };
 
-  const getCatColor = (cat) => { /* ... 기존 코드 유지 ... */ 
+  const getCatColor = (cat) => {
     if (isGoalMode) return 'bg-[#2C2C2E] text-[#3B82F6] border-[#3B82F6]/30';
     switch(cat) {
         case '공부': return 'bg-indigo-100 text-indigo-600 border-indigo-200';
@@ -123,13 +135,13 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
         default: return 'bg-gray-100 text-gray-500 border-gray-200';
     }
   };
-  const getStatusIcon = (status) => { /* ... 기존 코드 유지 ... */ 
+  const getStatusIcon = (status) => {
     if (status === 'done') return <Check size={12} className={isGoalMode ? "text-[#2F3438]" : "text-white"} />;
     if (status === 'fail') return <X size={12} className="text-white" />;
     if (status === 'triangle') return <Triangle size={8} className="text-white fill-current" />;
     return null;
   };
-  const getStatusColor = (status) => { /* ... 기존 코드 유지 ... */ 
+  const getStatusColor = (status) => {
     const pointColor = isGoalMode ? 'bg-[#3B82F6] border-[#3B82F6]' : 'bg-gray-900 border-gray-900'; 
     const failColor = 'bg-red-500 border-red-500';
     const triColor = 'bg-yellow-500 border-yellow-500';
@@ -161,7 +173,6 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
     <div className={`${containerClass} rounded-xl p-4 border h-full flex flex-col overflow-hidden transition-all select-none`} onClick={closeAllMenus}>
       <div className={`flex justify-between items-end mb-4 border-b pb-3 shrink-0 ${isGoalMode ? 'border-[#3F4448]' : 'border-gray-200'}`}>
         <div className="flex items-center gap-2 relative group">
-          {/* [수정] D-Day 표시 로직 적용 */}
           <h2 className={`text-2xl font-black ${textClass} tracking-tight`}>{renderDDay()}</h2>
           <Calendar className={pointTextClass} size={20} />
           <input type="date" value={dateString} onChange={(e) => setCurrentDate(new Date(e.target.value))} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
@@ -205,7 +216,6 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd }) => {
       </ul>
       
       <button onClick={handleTodayClear} className={`w-full py-3.5 rounded-xl font-bold mt-3 flex items-center justify-center gap-2 transition-transform active:scale-[0.98] text-sm shrink-0 ${clearBtnClass}`}>
-        {/* [수정] 버튼 텍스트 동적 변경 */}
         {getButtonText()} <ArrowRight size={14} />
       </button>
     </div>

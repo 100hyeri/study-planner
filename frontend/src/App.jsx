@@ -10,7 +10,7 @@ import StatisticsPage from './pages/StatisticsPage';
 import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import LandingPage from './pages/LandingPage'; // [New] 랜딩 페이지 import
+import LandingPage from './pages/LandingPage';
 import { getOngoingGoal } from './api/statsApi';
 
 const App = () => {
@@ -20,7 +20,6 @@ const App = () => {
   });
   
   const [isSignup, setIsSignup] = useState(false);
-  // [New] 랜딩 페이지 표시 여부 상태 (로그인 안 했을 때 기본 true)
   const [showLanding, setShowLanding] = useState(true);
 
   const [mode, setMode] = useState(() => localStorage.getItem('planner_mode') || 'daily');
@@ -31,26 +30,28 @@ const App = () => {
   const [showStats, setShowStats] = useState(() => localStorage.getItem('planner_showStats') === 'true');
   const [showSettings, setShowSettings] = useState(() => localStorage.getItem('planner_showSettings') === 'true');
 
-  // 로그인 핸들러
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('planner_user', JSON.stringify(userData));
     checkOngoingGoal(userData.id);
   };
 
-  // 로그아웃 핸들러
   const handleLogout = () => {
     setUser(null);
     setMode('daily');
     setShowStats(false);
     setShowSettings(false);
-    setShowLanding(true); // 로그아웃 시 랜딩 페이지로 복귀
+    setShowLanding(true); 
     localStorage.clear();
   };
 
-  // 랜딩 페이지에서 '시작하기' 클릭 시
   const handleStart = () => {
     setShowLanding(false);
+  };
+
+  const handleBackToLanding = () => {
+    setShowLanding(true);
+    setIsSignup(false);
   };
 
   const checkOngoingGoal = async (userId) => {
@@ -94,29 +95,18 @@ const App = () => {
   const toggleSettings = () => { setShowSettings(true); setShowStats(false); };
   const goHome = () => { setShowStats(false); setShowSettings(false); };
 
-  // --- [화면 렌더링 로직 수정] ---
-
-  // 1. 비로그인 상태일 때
   if (!user) {
-    // 1-1. 랜딩 페이지 먼저 표시
-    if (showLanding) {
-      return <LandingPage onStart={handleStart} />;
-    }
-    // 1-2. 회원가입 화면
-    if (isSignup) {
-      return <SignupPage onGoLogin={() => setIsSignup(false)} />;
-    }
-    // 1-3. 로그인 화면
-    return <LoginPage onLogin={handleLogin} onGoSignup={() => setIsSignup(true)} />;
+    if (showLanding) return <LandingPage onStart={handleStart} />;
+    if (isSignup) return <SignupPage onGoLogin={() => setIsSignup(false)} onBack={handleBackToLanding} />;
+    return <LoginPage onLogin={handleLogin} onGoSignup={() => setIsSignup(true)} onBack={handleBackToLanding} />;
   }
 
-  // 2. 로그인 후 화면들
   const isGoalMode = mode === 'goal';
   const bgClass = isGoalMode ? 'bg-[#121212]' : 'bg-gray-50';
   const textClass = isGoalMode ? 'text-white' : 'text-gray-900';
 
   if (showStats) {
-    return <StatisticsPage onBack={goHome} userId={user.id} onSettingsClick={toggleSettings} onLogout={handleLogout} />;
+    return <StatisticsPage onBack={goHome} userId={user.id} username={user.nickname} onSettingsClick={toggleSettings} onLogout={handleLogout} />;
   }
 
   if (showSettings) {
@@ -139,12 +129,14 @@ const App = () => {
           <div className="lg:col-span-2 flex flex-col gap-3 h-full min-h-0">
             <MusicPlayer isGoalMode={isGoalMode} />
             <div className="flex-1 min-h-0"> 
+              {/* [수정] userId 전달 */}
               <Planner 
                 mode={mode} 
                 goalInfo={goalInfo} 
                 isGoalMode={isGoalMode} 
                 onDecreaseDDay={() => setGoalInfo(prev => ({ ...prev, dDay: Math.max(0, prev.dDay - 1) }))}
-                onGoalEnd={handleSwitchToDaily} 
+                onGoalEnd={handleSwitchToDaily}
+                userId={user.id} 
               />
             </div>
           </div>
@@ -153,34 +145,40 @@ const App = () => {
             {isGoalMode ? (
               <>
                 <div className="h-auto shrink-0">
+                  {/* [수정] userId 전달 */}
                   <GoalModeSwitch 
                     onSwitchMode={handleModeSwitch} 
                     onGoalEnd={handleSwitchToDaily} 
                     isGoalMode={isGoalMode} 
                     goalInfo={goalInfo}
+                    userId={user.id}
                   />
                 </div>
                 <div className="flex-1 min-h-0">
                   <LectureSearch isGoalMode={isGoalMode} />
                 </div>
                 <div className="h-auto shrink-0">
-                  <Timer isGoalMode={isGoalMode} />
+                  {/* [수정] userId 전달 */}
+                  <Timer isGoalMode={isGoalMode} userId={user.id} />
                 </div>
               </>
             ) : (
               <>
                 <div className="h-auto shrink-0">
-                  <Timer isGoalMode={isGoalMode} />
+                  {/* [수정] userId 전달 */}
+                  <Timer isGoalMode={isGoalMode} userId={user.id} />
                 </div>
                 <div className="flex-1 min-h-0">
                   <LectureSearch isGoalMode={isGoalMode} />
                 </div>
                 <div className="h-auto shrink-0">
+                  {/* [수정] userId 전달 */}
                   <GoalModeSwitch 
                     onSwitchMode={handleModeSwitch} 
                     onGoalEnd={handleSwitchToDaily} 
                     isGoalMode={isGoalMode} 
                     goalInfo={goalInfo}
+                    userId={user.id}
                   />
                 </div>
               </>

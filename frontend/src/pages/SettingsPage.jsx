@@ -86,7 +86,8 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
         username={username}
       />
 
-      <div className="flex-1 px-8 py-6 w-full max-w-3xl mx-auto h-full overflow-y-auto custom-scrollbar">
+      {/* [수정] overflow-y-auto -> overflow-hidden 으로 변경하여 스크롤 제거 */}
+      <div className="flex-1 px-8 py-6 w-full max-w-3xl mx-auto h-full overflow-hidden">
         <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-6">설정</h2>
 
         {/* 1. 계정 관리 섹션 */}
@@ -117,7 +118,7 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
           <div className={itemClass} onClick={handleBackup}>
             <div className={labelClass}>
               <div className={iconBoxClass}><Download size={16} /></div>
-              <span>학습 기록 백업 (JSON)</span>
+              <span>목표 모드 기록 백업 (JSON)</span>
             </div>
             <ChevronRight size={16} className="text-gray-400" />
           </div>
@@ -141,7 +142,7 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
         </div>
       </div>
 
-      {/* 정보 수정 모달 (일상 모드 디자인 적용) */}
+      {/* 정보 수정 모달 */}
       {isModalOpen && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in px-4">
           <div className="bg-white w-full max-w-sm p-6 rounded-2xl shadow-2xl border border-gray-100 transform transition-all scale-100">

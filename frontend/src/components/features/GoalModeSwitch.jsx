@@ -2,30 +2,28 @@ import React, { useState } from 'react';
 import { Trophy, LogOut, Target } from 'lucide-react';
 import { createGoal, updateGoalStatus } from '../../api/statsApi'; 
 
-// [수정] onGoalEnd prop으로 이름 변경 (성공/실패 공통 종료 처리)
-const GoalModeSwitch = ({ onSwitchMode, onGoalEnd, isGoalMode, goalInfo }) => {
+// [수정] userId props 추가
+const GoalModeSwitch = ({ onSwitchMode, onGoalEnd, isGoalMode, goalInfo, userId }) => {
   const [goal, setGoal] = useState('');
   const [dDay, setDDay] = useState('');
 
   const handleSwitch = async () => {
     if(!goal) return alert("목표 이름을 입력해주세요!");
     if(!dDay) return alert("D-Day를 입력해주세요!");
-    const userId = 1;
+    if(!userId) return;
+
     await createGoal(userId, goal, dDay);
     onSwitchMode({ title: goal, dDay: dDay });
   };
 
-  // [수정] 목표 종료 핸들러
   const handleEndGoal = async () => {
-    const userId = 1;
+    if(!userId) return;
     const currentDDay = parseInt(goalInfo.dDay);
 
     if (currentDDay === 0) {
-      // 1. D-Day 도달 시 -> 성공 처리 & 자동 복귀
       await updateGoalStatus(userId, 'success');
-      onGoalEnd(); // 일상 모드로 전환
+      onGoalEnd(); 
     } else {
-      // 2. D-Day 아닐 때 -> 포기 확인 후 실패 처리
       if (window.confirm('정말 목표 모드를 종료하고 일상으로 돌아가시겠습니까? (목표는 실패 처리됩니다)')) {
         await updateGoalStatus(userId, 'fail');
         onGoalEnd();
@@ -38,12 +36,10 @@ const GoalModeSwitch = ({ onSwitchMode, onGoalEnd, isGoalMode, goalInfo }) => {
   const inputClass = isGoalMode ? 'bg-[#2C2C2E] border-transparent text-white focus:ring-1 focus:ring-[#3B82F6] placeholder-[#A1A1AA]' : 'bg-white border-gray-200 text-gray-900 focus:border-indigo-500';
   const btnClass = isGoalMode ? 'bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] text-white shadow-lg hover:opacity-90' : 'bg-gray-900 hover:bg-gray-800 text-white';
 
-  // [수정] 버튼 텍스트 결정
   const buttonText = (isGoalMode && parseInt(goalInfo.dDay) === 0) 
     ? "목표 달성 / 일상 복귀" 
     : "목표 종료 / 일상 복귀";
 
-  // [수정] D-Day 텍스트 표시
   const dDayText = (isGoalMode && parseInt(goalInfo.dDay) === 0)
     ? "D-Day"
     : `D-${goalInfo.dDay}`;
@@ -67,7 +63,6 @@ const GoalModeSwitch = ({ onSwitchMode, onGoalEnd, isGoalMode, goalInfo }) => {
               <span className="text-lg font-bold">{dDayText}</span>
             </div>
           </div>
-          {/* [수정] 핸들러 변경 */}
           <button onClick={handleEndGoal} className="w-full py-2.5 rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-2 bg-[#2C2C2E] text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-600">
             <LogOut size={12}/> {buttonText}
           </button>
