@@ -12,6 +12,7 @@ const StatisticsPage = ({ onBack, userId = 1, username, onSettingsClick, onLogou
   const [period, setPeriod] = useState('weekly'); 
   const [loading, setLoading] = useState(true);
 
+  // 데이터 로딩: 통계 및 목표 이력
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -34,6 +35,8 @@ const StatisticsPage = ({ onBack, userId = 1, username, onSettingsClick, onLogou
   const totalTasks = categoryData.reduce((acc, cur) => acc + cur.count, 0);
   const daysInPeriod = period === 'monthly' ? 30 : 7;
   const avgTasks = (totalTasks / daysInPeriod).toFixed(1); 
+
+  // 계획 달성률 계산 (월간: 활동 여부, 주간: 목표 달성 여부)
   const achievementRate = data.length > 0 
     ? Math.round((data.filter(d => period === 'monthly' ? d.minutes > 0 : d.isSuccess).length / data.length) * 100) 
     : 0;
@@ -109,7 +112,7 @@ const StatisticsPage = ({ onBack, userId = 1, username, onSettingsClick, onLogou
       />
 
       <div className="flex-1 px-8 py-6 w-full max-w-6xl mx-auto h-full overflow-hidden flex flex-col">
-        
+        {/* 상단 컨트롤 바 */}
         <div className="shrink-0 flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
             <div className="flex items-center gap-6">
                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight">나의 활동 분석</h2>
@@ -131,7 +134,7 @@ const StatisticsPage = ({ onBack, userId = 1, username, onSettingsClick, onLogou
 
         {activeTab === 'overview' ? (
           <div className="flex flex-col h-full gap-4 min-h-0">
-            
+            {/* 요약 카드 */}
             <div className="grid grid-cols-4 gap-4 shrink-0">
                 {[
                     { title: '총 완료', icon: <CheckCircle size={14}/>, value: `${totalTasks}건`, color: 'text-gray-900' },
@@ -146,11 +149,11 @@ const StatisticsPage = ({ onBack, userId = 1, username, onSettingsClick, onLogou
                 ))}
             </div>
 
+            {/* 그래프 영역 */}
             <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0">
-              
+              {/* 집중 시간 리포트 (막대 그래프) */}
               <div className={`${cardClass} p-5 flex-1 flex flex-col min-h-0`}>
                 <h3 className="text-sm font-bold text-gray-800 mb-6 shrink-0 flex items-center gap-2"><span className="w-1 h-4 bg-indigo-500 rounded-full"></span>집중 시간 리포트</h3>
-                {/* [수정] min-h-[300px] 추가하여 높이 0 오류 방지 */}
                 <div className="flex-1 w-full min-h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data} margin={{top: 10, right: 10, left: -20, bottom: 0}}>
@@ -163,9 +166,9 @@ const StatisticsPage = ({ onBack, userId = 1, username, onSettingsClick, onLogou
                 </div>
               </div>
 
+              {/* 활동 비율 (파이 차트) */}
               <div className={`${cardClass} p-5 w-full md:w-1/3 flex flex-col min-h-0`}>
                 <h3 className="text-sm font-bold text-gray-800 mb-2 shrink-0 flex items-center gap-2"><span className="w-1 h-4 bg-emerald-500 rounded-full"></span>활동 비율</h3>
-                {/* [수정] min-h-[300px] 추가하여 높이 0 오류 방지 */}
                 <div className="flex-1 w-full min-h-[300px] flex items-center justify-center">
                   {categoryData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -181,6 +184,7 @@ const StatisticsPage = ({ onBack, userId = 1, username, onSettingsClick, onLogou
             </div>
           </div>
         ) : (
+          /* 목표 히스토리 탭 */
           <div className={`${cardClass} p-0 h-full flex flex-col overflow-hidden`}>
             <div className="p-5 border-b border-gray-100 shrink-0">
                 <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2"><span className="w-1 h-4 bg-orange-500 rounded-full"></span>목표 히스토리</h3>

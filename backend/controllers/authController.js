@@ -40,17 +40,17 @@ exports.login = async (req, res) => {
   }
 };
 
-// [New] 회원정보 수정 (이 부분이 없어서 에러가 났을 거예요)
+// 회원정보 수정
 exports.updateUser = async (req, res) => {
   try {
     const { id, nickname, password } = req.body;
     
-    // 1. 닉네임 변경
+    // 닉네임 변경
     if (nickname) {
       await pool.query('UPDATE users SET nickname = ? WHERE id = ?', [nickname, id]);
     }
 
-    // 2. 비밀번호 변경 (입력된 경우만)
+    // 비밀번호 변경
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, id]);

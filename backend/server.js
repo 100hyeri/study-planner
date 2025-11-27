@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-// [라우트 연결 - 여기가 중요합니다!]
+// 라우트 연결
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/todos', require('./routes/todoRoutes')); // 할 일 기능
 app.use('/api/stats', require('./routes/statsRoutes')); // 통계 기능

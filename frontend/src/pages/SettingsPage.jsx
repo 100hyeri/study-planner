@@ -10,7 +10,7 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
   const [modalType, setModalType] = useState(''); // 'nickname' or 'password'
   const [inputValue, setInputValue] = useState('');
 
-  // [기능 1] 데이터 백업 (JSON 다운로드)
+  // 햑습 목표 기록을 JSON 파일로 백업
   const handleBackup = async () => {
     if(window.confirm('나의 학습 목표 기록을 파일로 저장하시겠습니까?')) {
       try {
@@ -30,14 +30,13 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
     }
   };
 
-  // 모달 열기
   const openModal = (type) => {
     setModalType(type);
     setInputValue('');
     setIsModalOpen(true);
   };
 
-  // [기능 2] 회원 정보 수정 (DB 연동)
+  // 회원 정보 수정 (DB 연동)
   const handleUpdate = async () => {
     if (!inputValue.trim()) return alert("내용을 입력해주세요.");
     
@@ -60,14 +59,12 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
     }
   };
 
-  // [기능 3] 로그아웃 핸들러 (확인 창)
   const handleLogoutClick = () => {
     if (window.confirm('정말 로그아웃 하시겠습니까?')) {
       onLogout();
     }
   };
 
-  // 스타일 클래스 (일상 모드 테마 적용)
   const sectionClass = "bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-6";
   const itemClass = "flex items-center justify-between px-6 py-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer";
   const labelClass = "text-sm font-medium text-gray-700 flex items-center gap-3";
@@ -75,8 +72,6 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 text-gray-900 overflow-hidden transition-colors duration-500 relative">
-      
-      {/* 헤더: 로그아웃 및 통계 페이지 이동 기능 전달 */}
       <Header 
         isGoalMode={false} 
         isSettingsPage={true} 
@@ -86,11 +81,10 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
         username={username}
       />
 
-      {/* [수정] overflow-y-auto -> overflow-hidden 으로 변경하여 스크롤 제거 */}
       <div className="flex-1 px-8 py-6 w-full max-w-3xl mx-auto h-full overflow-hidden">
         <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-6">설정</h2>
 
-        {/* 1. 계정 관리 섹션 */}
+        {/* 계정 관리 섹션 */}
         <div className="mb-2 px-1 text-xs font-bold text-gray-400 uppercase tracking-wider">계정 관리</div>
         <div className={sectionClass}>
           <div className={itemClass} onClick={() => openModal('nickname')}>
@@ -112,19 +106,19 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
           </div>
         </div>
 
-        {/* 2. 데이터 섹션 */}
+        {/* 데이터 섹션 */}
         <div className="mb-2 px-1 text-xs font-bold text-gray-400 uppercase tracking-wider">데이터</div>
         <div className={sectionClass}>
           <div className={itemClass} onClick={handleBackup}>
             <div className={labelClass}>
               <div className={iconBoxClass}><Download size={16} /></div>
-              <span>목표 모드 기록 백업 (JSON)</span>
+              <span>학습 목표 기록 백업 (JSON)</span>
             </div>
             <ChevronRight size={16} className="text-gray-400" />
           </div>
         </div>
 
-        {/* 3. 기타 섹션 */}
+        {/* 기타 섹션 */}
         <div className="mb-2 px-1 text-xs font-bold text-gray-400 uppercase tracking-wider">기타</div>
         <div className={sectionClass}>
           <div className={itemClass} onClick={handleLogoutClick}>

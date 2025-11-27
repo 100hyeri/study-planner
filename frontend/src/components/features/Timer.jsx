@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, ChevronUp, ChevronDown, Timer as TimerIcon } from 'lucide-react';
 import { saveStudyLog, getTodayStudyTime } from '../../api/statsApi'; 
 
-// [수정] userId를 props로 받음
 const Timer = ({ isGoalMode, userId }) => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   
+  // 목표 타이머용 상태
   const [targetH, setTargetH] = useState(0);
   const [targetM, setTargetM] = useState(50);
   const [targetS, setTargetS] = useState(0);
@@ -21,12 +21,14 @@ const Timer = ({ isGoalMode, userId }) => {
     return (targetH * 3600) + (targetM * 60) + targetS;
   };
 
+  // 타이머 실행 로직(1초마다 갱신)
   useEffect(() => {
     let interval = null;
     if (isRunning) {
       if (!startTimeRef.current) startTimeRef.current = Date.now();
       interval = setInterval(() => {
         setTime(prevTime => {
+          // 목표 모드: 카운트 다운
           if (isGoalMode) {
             if (prevTime <= 0) {
               clearInterval(interval);
@@ -34,7 +36,9 @@ const Timer = ({ isGoalMode, userId }) => {
               return 0;
             }
             return prevTime - 1;
-          } else {
+          }
+          // 일상 모드: 카운트 업 
+          else {
             return prevTime + 1;
           }
         });
@@ -42,6 +46,7 @@ const Timer = ({ isGoalMode, userId }) => {
     } 
     return () => {
       if (interval) clearInterval(interval);
+      // 일상 모드에서 정지 시 자동 저장
       if (isRunning && !isGoalMode && startTimeRef.current) {
         saveCurrentSession();
         startTimeRef.current = null;
@@ -49,6 +54,7 @@ const Timer = ({ isGoalMode, userId }) => {
     };
   }, [isRunning, isGoalMode]);
 
+  // 모드 변경 또는 유저 변경 시 타이머 초기화
   useEffect(() => {
     setIsRunning(false);
     if (isGoalMode) {
@@ -62,7 +68,7 @@ const Timer = ({ isGoalMode, userId }) => {
         });
       }
     }
-  }, [isGoalMode, userId]); // userId 변경 시 실행
+  }, [isGoalMode, userId]);
 
   useEffect(() => {
     if (isGoalMode && !isRunning) {
@@ -70,9 +76,9 @@ const Timer = ({ isGoalMode, userId }) => {
     }
   }, [targetH, targetM, targetS]);
 
+  // DB에 학습 시간 저장
   const saveCurrentSession = async () => {
-    if (isGoalMode || !userId) return; 
-    // [수정] const userId = 1 제거 -> props의 userId 사용
+    if (isGoalMode || !userId) return;
     const currentTime = timeRef.current;
     const sessionSeconds = currentTime - lastSavedTimeRef.current;
     if (sessionSeconds > 0) {

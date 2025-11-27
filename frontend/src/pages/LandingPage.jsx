@@ -7,7 +7,6 @@ const LandingPage = ({ onStart }) => {
       
       {/* 상단 네비게이션 */}
       <header className="flex justify-between items-center py-3 px-6 border-b border-gray-100 bg-white fixed w-full z-50 top-0 left-0 shrink-0 shadow-sm">
-        {/* [수정] 아이콘 제거, 텍스트 스타일 Header.jsx와 통일 */}
         <div className="text-xl font-black tracking-wider flex items-center gap-2 text-gray-800">
           PLANNER.
         </div>
@@ -90,7 +89,7 @@ const LandingPage = ({ onStart }) => {
       {/* 푸터 */}
       <footer className="py-4 border-t border-gray-100 text-center bg-white shrink-0">
         <p className="text-xs font-bold text-gray-900">PLANNER.</p>
-        <p className="text-[10px] text-gray-400">https://github.com/100hyeri/study-planner.git.</p>
+        <p className="text-[10px] text-gray-400">https://github.com/100hyeri/study-planner</p>
       </footer>
     </div>
   );

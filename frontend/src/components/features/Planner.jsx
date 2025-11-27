@@ -9,6 +9,8 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
   const categories = ['공부', '운동', '식사', '휴식', '기타']; 
   const [openMenuId, setOpenMenuId] = useState(null);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
+ 
+  // 날짜 관련 상태
   const [currentDate, setCurrentDate] = useState(new Date());
   const dateString = new Date(currentDate.getTime() - (currentDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
   
@@ -34,18 +36,17 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
     } catch (error) { console.error("추가 실패", error); }
   };
 
+  // 할 일 상태 변경 (완료, 실패, 보류, 이동)
   const handleStatusChange = async (id, newStatus) => {
     if (newStatus === 'move') {
       if (window.confirm('내일로 미루시겠습니까?')) {
-        // [수정] 단순히 삭제만 하던 로직 -> 내일 날짜로 복사 후 삭제하는 로직으로 변경
         const todoToMove = todos.find(t => t.id === id);
         if (todoToMove) {
-          // 1. 내일 날짜 계산
+          // 내일 날짜 계산하여 할 일 복사 후 현재 목록에서 삭제
           const nextDay = new Date(currentDate);
           nextDay.setDate(nextDay.getDate() + 1);
           const nextDayString = new Date(nextDay.getTime() - (nextDay.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
-          // 2. 내일 날짜로 할 일 추가
           await addTodo({
             userId,
             content: todoToMove.content,
@@ -53,7 +54,6 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
             todoDate: nextDayString
           });
 
-          // 3. 오늘 목록에서 삭제
           await deleteTodo(id);
           setTodos(todos.filter(t => t.id !== id));
           
@@ -78,6 +78,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
     setTodos(todos.filter(t => t.id !== id));
   };
 
+  // 하루 마감 로직: 달성률 계산 및 목표 모드 상태 업데이트
   const handleTodayClear = async () => {
     const total = todos.length;
     const doneCount = todos.filter(t => t.status === 'done').length;
@@ -88,6 +89,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
     if (isGoalMode) {
       const currentDDay = parseInt(goalInfo.dDay);
 
+      // D-day 도달 시 성공 처리
       if (currentDDay === 0) {
         if (userId) await updateGoalStatus(userId, 'success'); 
         alert("목표를 달성하셨습니다! 정말 고생 많으셨어요 🎉");
@@ -98,6 +100,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
         if (onDecreaseDDay) onDecreaseDDay();
         alert("오늘이 바로 D-Day입니다.\n지금까지 준비하신 만큼 잘하실 거예요! 조심히 다녀오세요!");
       } 
+      // 그 외의 경우 D-Day 감소
       else {
         if (onDecreaseDDay) onDecreaseDDay();
         alert(`오늘 하루도 고생 많으셨습니다!\n달성률: ${percent}%\nD-Day가 1일 줄었습니다.`);
@@ -106,6 +109,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
       alert(`오늘 하루도 고생 많으셨습니다!\n달성률: ${percent}%`);
     }
     
+    // 마감 후 다음 날짜로 이동
     const next = new Date(currentDate);
     next.setDate(next.getDate() + 1);
     setCurrentDate(next);
@@ -125,6 +129,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
     return "하루 마감";
   };
 
+  // UI 스타일 헬퍼 함수
   const getCatColor = (cat) => {
     if (isGoalMode) return 'bg-[#2C2C2E] text-[#3B82F6] border-[#3B82F6]/30';
     switch(cat) {

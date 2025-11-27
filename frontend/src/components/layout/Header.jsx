@@ -14,7 +14,7 @@ const Header = ({ isGoalMode, onStatsClick, onSettingsClick, onLogoClick, userna
     ? (isGoalMode ? 'text-white font-bold underline underline-offset-4 decoration-2' : 'text-black font-bold underline underline-offset-4 decoration-2')
     : (isGoalMode ? 'hover:text-white' : 'hover:text-black');
 
-  // [New] 설정 페이지 활성화 스타일
+  // 설정 페이지 활성화 스타일
   const settingsTextClass = isSettingsPage 
     ? (isGoalMode ? 'text-white font-bold underline underline-offset-4 decoration-2' : 'text-black font-bold underline underline-offset-4 decoration-2')
     : (isGoalMode ? 'hover:text-white' : 'hover:text-black');
@@ -41,7 +41,6 @@ const Header = ({ isGoalMode, onStatsClick, onSettingsClick, onLogoClick, userna
         
         <span className="h-3 w-px bg-current opacity-20"></span>
         
-        {/* [수정] 설정 버튼에 이벤트 및 스타일 연결 */}
         <button 
           onClick={onSettingsClick}
           className={`flex items-center gap-1 transition-colors ${settingsTextClass}`}

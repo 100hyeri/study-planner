@@ -24,7 +24,6 @@ const LoginPage = ({ onLogin, onGoSignup, onBack }) => {
 
   return (
     <div className={`h-screen flex flex-col ${bgClass} transition-colors duration-500`}>
-      {/* [New] 로그인용 헤더: 로고 아이콘 제거 및 스타일 통일 */}
       <header className="flex items-center py-3 px-6 border-b border-gray-100 bg-white fixed w-full z-50 top-0 left-0 shrink-0 shadow-sm">
         <div 
           onClick={onBack} 

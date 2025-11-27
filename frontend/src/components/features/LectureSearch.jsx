@@ -13,7 +13,7 @@ const LectureSearch = ({ isGoalMode }) => {
     if (!query.trim()) return;
     setIsLoading(true);
     setResults([]);
-    const videoData = await searchYoutubeVideos(query, 10); // 결과 개수 늘림
+    const videoData = await searchYoutubeVideos(query, 10);
     setResults(videoData);
     setIsLoading(false);
   };
@@ -28,7 +28,6 @@ const LectureSearch = ({ isGoalMode }) => {
   const inputClass = isGoalMode ? 'bg-[#2C2C2E] border-transparent text-white focus:ring-1 focus:ring-[#3B82F6] placeholder-[#A1A1AA]' : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-indigo-500 placeholder-gray-500';
   const tagClass = isGoalMode ? 'bg-[#2C2C2E] text-gray-400 hover:bg-gray-600 hover:text-white' : 'bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-600';
 
-  // [수정] h-full 추가 (부모의 flex-1 영역 채움)
   return (
     <div className={`${containerClass} rounded-xl p-3 border text-center w-full h-full flex flex-col transition-all duration-500`}>
       <div className={`flex items-center gap-2 mb-2 border-b pb-1 shrink-0 ${isGoalMode ? 'border-gray-800' : 'border-gray-900'}`}>
@@ -44,7 +43,6 @@ const LectureSearch = ({ isGoalMode }) => {
         <button type="submit" className={`absolute right-3 top-1.5 hover:text-white ${subTextClass}`}><Search size={12} /></button>
       </form>
         
-      {/* [수정] flex-1 overflow-y-auto 적용 -> 내부 스크롤 활성화 */}
       <div className="flex-1 overflow-y-auto px-1 custom-scrollbar min-h-0">
         {isLoading ? <p className={`text-center text-[10px] py-4 ${subTextClass}`}>검색 중...</p> : results.length > 0 ? (
           <div className="text-xs space-y-2 pb-2">

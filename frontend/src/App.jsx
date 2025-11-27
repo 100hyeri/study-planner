@@ -14,6 +14,7 @@ import LandingPage from './pages/LandingPage';
 import { getOngoingGoal } from './api/statsApi';
 
 const App = () => {
+  // 사용자 인증 정보 초기화 (LocalStorage 연동)
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('planner_user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -22,6 +23,7 @@ const App = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
 
+  // 앱 모드 및 설정 상태 관리
   const [mode, setMode] = useState(() => localStorage.getItem('planner_mode') || 'daily');
   const [goalInfo, setGoalInfo] = useState(() => {
     const saved = localStorage.getItem('planner_goalInfo');
@@ -54,6 +56,7 @@ const App = () => {
     setIsSignup(false);
   };
 
+  // 로그인 시 진행 중인 목표가 있는지 확인하여 모드 동기화
   const checkOngoingGoal = async (userId) => {
     const ongoingData = await getOngoingGoal(userId);
     if (ongoingData) {
@@ -62,6 +65,7 @@ const App = () => {
       localStorage.setItem('planner_mode', 'goal');
       localStorage.setItem('planner_goalInfo', JSON.stringify(ongoingData));
     } else {
+      // 진행 중인 목표가 없는데 목표 모드인 경우 일상 모드로 복귀
       if (localStorage.getItem('planner_mode') === 'goal') {
          setMode('daily');
          localStorage.setItem('planner_mode', 'daily');
@@ -69,12 +73,14 @@ const App = () => {
     }
   };
 
+  //사용자 상태 변경 시 목표 확인
   useEffect(() => {
     if (user) {
       checkOngoingGoal(user.id);
     }
   }, [user]);
 
+  //상태 변경시 LocalStorage 동기화
   useEffect(() => { localStorage.setItem('planner_mode', mode); }, [mode]);
   useEffect(() => { localStorage.setItem('planner_goalInfo', JSON.stringify(goalInfo)); }, [goalInfo]);
   useEffect(() => { localStorage.setItem('planner_showStats', showStats); }, [showStats]);
@@ -95,12 +101,14 @@ const App = () => {
   const toggleSettings = () => { setShowSettings(true); setShowStats(false); };
   const goHome = () => { setShowStats(false); setShowSettings(false); };
 
+  // 렌더링 로직: 비로그인 상태 처리
   if (!user) {
     if (showLanding) return <LandingPage onStart={handleStart} />;
     if (isSignup) return <SignupPage onGoLogin={() => setIsSignup(false)} onBack={handleBackToLanding} />;
     return <LoginPage onLogin={handleLogin} onGoSignup={() => setIsSignup(true)} onBack={handleBackToLanding} />;
   }
 
+  // 로그인 후 화면 렌더링
   const isGoalMode = mode === 'goal';
   const bgClass = isGoalMode ? 'bg-[#121212]' : 'bg-gray-50';
   const textClass = isGoalMode ? 'text-white' : 'text-gray-900';
@@ -128,8 +136,7 @@ const App = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
           <div className="lg:col-span-2 flex flex-col gap-3 h-full min-h-0">
             <MusicPlayer isGoalMode={isGoalMode} />
-            <div className="flex-1 min-h-0"> 
-              {/* [수정] userId 전달 */}
+            <div className="flex-1 min-h-0">
               <Planner 
                 mode={mode} 
                 goalInfo={goalInfo} 
@@ -145,7 +152,6 @@ const App = () => {
             {isGoalMode ? (
               <>
                 <div className="h-auto shrink-0">
-                  {/* [수정] userId 전달 */}
                   <GoalModeSwitch 
                     onSwitchMode={handleModeSwitch} 
                     onGoalEnd={handleSwitchToDaily} 
@@ -158,21 +164,18 @@ const App = () => {
                   <LectureSearch isGoalMode={isGoalMode} />
                 </div>
                 <div className="h-auto shrink-0">
-                  {/* [수정] userId 전달 */}
                   <Timer isGoalMode={isGoalMode} userId={user.id} />
                 </div>
               </>
             ) : (
               <>
                 <div className="h-auto shrink-0">
-                  {/* [수정] userId 전달 */}
                   <Timer isGoalMode={isGoalMode} userId={user.id} />
                 </div>
                 <div className="flex-1 min-h-0">
                   <LectureSearch isGoalMode={isGoalMode} />
                 </div>
                 <div className="h-auto shrink-0">
-                  {/* [수정] userId 전달 */}
                   <GoalModeSwitch 
                     onSwitchMode={handleModeSwitch} 
                     onGoalEnd={handleSwitchToDaily} 

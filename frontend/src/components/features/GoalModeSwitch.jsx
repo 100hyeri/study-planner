@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Trophy, LogOut, Target } from 'lucide-react';
 import { createGoal, updateGoalStatus } from '../../api/statsApi'; 
 
-// [수정] userId props 추가
 const GoalModeSwitch = ({ onSwitchMode, onGoalEnd, isGoalMode, goalInfo, userId }) => {
   const [goal, setGoal] = useState('');
   const [dDay, setDDay] = useState('');
@@ -16,6 +15,7 @@ const GoalModeSwitch = ({ onSwitchMode, onGoalEnd, isGoalMode, goalInfo, userId 
     onSwitchMode({ title: goal, dDay: dDay });
   };
 
+  // 목표 종료 핸들러 (성공 또는 포기)
   const handleEndGoal = async () => {
     if(!userId) return;
     const currentDDay = parseInt(goalInfo.dDay);

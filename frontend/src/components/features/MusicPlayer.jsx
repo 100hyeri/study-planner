@@ -151,7 +151,6 @@ const MusicPlayer = ({ isGoalMode }) => {
     <div className={`${containerClass} rounded-lg p-3 border shrink-0 w-full relative transition-all duration-500`}>
       
       <div className="flex items-center gap-2 mb-2">
-        {/* [한글] 헤더 */}
         <h3 className={`font-extrabold text-xs tracking-tight ${textClass}`}>오늘의 음악</h3>
         <Music size={12} className={iconClass} />
         <div className="flex items-center gap-1 ml-1">
