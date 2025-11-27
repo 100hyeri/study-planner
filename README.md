@@ -81,19 +81,19 @@
 ## 📂 프로젝트 구조
 study-planner/
 ├── backend/
-│   ├── config/         # DB 설정
-│   ├── controllers/    # 로직 처리 (Auth, Todo, Stats)
-│   ├── routes/         # API 라우팅
-│   └── server.js       # 서버 진입점
+│   ├── config/          # DB 설정
+│   ├── controllers/     # 로직 처리 (Auth, Todo, Stats)
+│   ├── routes/          # API 라우팅
+│   └── server.js        # 서버 진입점
 │
 └── frontend/
     ├── public/
     ├── src/
-    │   ├── api/        # API 호출 함수 (fetch wrapper)
+    │   ├── api/         # API 호출 함수 (fetch wrapper)
     │   ├── components/
-    │   │   ├── features/ # 주요 기능 (Planner, Timer 등)
-    │   │   └── layout/   # 레이아웃 (Header)
-    │   ├── pages/      # 페이지 (Login, Main, Statistics 등)
-    │   ├── App.jsx     # 메인 앱 컴포넌트 & 라우팅
+    │   │   ├── features/   # 주요 기능 (Planner, Timer 등)
+    │   │   └── layout/     # 레이아웃 (Header 등)
+    │   ├── pages/       # 페이지 (Login, Main, Statistics 등)
+    │   ├── App.jsx      # 메인 앱 컴포넌트 & 라우팅
     │   └── main.jsx
     └── vite.config.js
