@@ -132,7 +132,7 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
         </div>
 
         <div className="text-center text-xs text-gray-400 mt-8 mb-8">
-          © 2025 STUDY PLANNER
+          https://github.com/100hyeri/study-planner
         </div>
       </div>
 

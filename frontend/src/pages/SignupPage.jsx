@@ -72,9 +72,10 @@ const SignupPage = ({ onGoLogin, onBack }) => {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <button onClick={onGoLogin} className="text-xs text-gray-500 hover:text-gray-900 underline underline-offset-2">
-              이미 계정이 있으신가요? 로그인
+          <div className="mt-6 text-center flex justify-center items-center gap-2 text-xs text-gray-500">
+            <span>이미 계정이 있으신가요?</span>
+            <button onClick={onGoLogin} className="font-bold text-gray-900 hover:underline">
+              로그인
             </button>
           </div>
         </div>

@@ -79,6 +79,7 @@
 - **Security:** Bcrypt(해시), JWT(인증)
 
 ## 📂 프로젝트 구조
+```plaintext
 study-planner/
 ├── backend/
 │   ├── config/          # DB 설정
@@ -97,3 +98,4 @@ study-planner/
     │   ├── App.jsx      # 메인 앱 컴포넌트 & 라우팅
     │   └── main.jsx
     └── vite.config.js
+```
