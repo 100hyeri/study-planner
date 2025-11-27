@@ -126,7 +126,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
     if (isGoalMode && parseInt(goalInfo.dDay) === 0) {
       return "목표 달성 / 일상 복귀";
     }
-    return "하루 마감";
+    return "하루를 마무리하기";
   };
 
   // UI 스타일 헬퍼 함수

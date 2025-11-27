@@ -3,7 +3,6 @@
 **Study Planner**는 하루를 계획하고 목표를 달성하기 위한 심플하고 체계적인 웹 애플리케이션입니다.  
 복잡한 기능은 덜어내고, 학습자가 공부에 몰입할 수 있도록 돕는 핵심 기능들로 구성되어 있습니다.
 
----
 
 ## ✨ 주요 기능 (Key Features)
 
@@ -18,7 +17,6 @@
 - **내일로 미루기**  
   오늘 못한 일은 화살표 버튼 하나로 다음 날 계획으로 이동할 수 있습니다.
 
----
 
 ### 🎯 목표 모드 (Goal Mode)
 
@@ -31,7 +29,6 @@
 - **목표 관리 기능**  
   목표 달성 여부를 기록하고 진행 중인 목표를 체계적으로 관리합니다.
 
----
 
 ### ⏱️ 스마트 타이머 (Smart Timer)
 
@@ -41,7 +38,6 @@
 - **목표 시간 도전**  
   목표 모드에서는 설정한 시간 동안 집중할 수 있는 Count Down 타이머를 제공합니다.
 
----
 
 ### 📊 성장 리포트 (Statistics)
 
@@ -54,7 +50,6 @@
 - **목표 히스토리 관리**  
   과거 목표들의 달성/실패 기록을 조회할 수 있습니다.
 
----
 
 ### 🎵 부가 기능
 
@@ -67,7 +62,6 @@
 - **데이터 백업**  
   학습 기록을 JSON 파일로 다운로드하여 안전하게 보관할 수 있습니다.
 
----
 
 ## 🛠️ 기술 스택 (Tech Stack)
 
@@ -83,3 +77,23 @@
 - **Framework:** Express.js  
 - **Database:** MySQL  
 - **Security:** Bcrypt(해시), JWT(인증)
+
+## 📂 프로젝트 구조
+study-planner/
+├── backend/
+│   ├── config/         # DB 설정
+│   ├── controllers/    # 로직 처리 (Auth, Todo, Stats)
+│   ├── routes/         # API 라우팅
+│   └── server.js       # 서버 진입점
+│
+└── frontend/
+    ├── public/
+    ├── src/
+    │   ├── api/        # API 호출 함수 (fetch wrapper)
+    │   ├── components/
+    │   │   ├── features/ # 주요 기능 (Planner, Timer 등)
+    │   │   └── layout/   # 레이아웃 (Header)
+    │   ├── pages/      # 페이지 (Login, Main, Statistics 등)
+    │   ├── App.jsx     # 메인 앱 컴포넌트 & 라우팅
+    │   └── main.jsx
+    └── vite.config.js
