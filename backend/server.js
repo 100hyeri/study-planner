@@ -17,11 +17,11 @@ app.use('/api/stats', require('./routes/statsRoutes')); // 통계 기능
 // DB 연결 확인
 pool.getConnection()
   .then((conn) => {
-    console.log("✅ MySQL 데이터베이스 연결 성공!");
+    console.log("MySQL 데이터베이스 연결됨");
     conn.release();
   })
   .catch((err) => {
-    console.error("❌ 데이터베이스 연결 실패:", err.message);
+    console.error("데이터베이스 연결 실패:", err.message);
   });
 
 app.listen(PORT, () => {

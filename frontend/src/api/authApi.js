@@ -24,19 +24,33 @@ export const registerUser = async (userData) => {
   }
 };
 
-// [New] 회원정보 수정 API
+//회원정보 수정 API
 export const updateUserInfo = async (id, nickname, password) => {
   try {
     const body = { id, nickname };
     if (password) body.password = password;
 
     const res = await fetch(`${BASE_URL}/update`, {
-      method: 'PUT', 
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     return await res.json();
   } catch (err) {
     return { message: '수정 실패' };
+  }
+};
+
+//회원 탈퇴 API
+export const deleteUserAccount = async (id) => {
+  try {
+    const res = await fetch(`${BASE_URL}/delete`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    return await res.json();
+  } catch (err) {
+    return { message: '탈퇴 요청 실패' };
   }
 };

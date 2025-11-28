@@ -8,7 +8,7 @@ const SignupPage = ({ onGoLogin, onBack }) => {
     e.preventDefault();
     const data = await registerUser(form);
     if (data.message && data.message.includes('성공')) {
-      alert('가입 성공! 로그인해주세요.');
+      alert('가입이 완료되었습니다 로그인해주세요.');
       onGoLogin();
     } else {
       alert(data.message || '회원가입 실패');

@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query('INSERT INTO users (email, password, nickname) VALUES (?, ?, ?)', [email, hashedPassword, nickname]);
-    
+
     res.status(201).json({ message: '회원가입 성공! 로그인해주세요.' });
   } catch (error) {
     console.error(error);
@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
     if (!isMatch) return res.status(401).json({ message: '비밀번호가 틀렸습니다.' });
 
     const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.JWT_SECRET, { expiresIn: '12h' });
-    
+
     // [중요] id도 함께 반환하도록 수정됨
     res.json({ message: '로그인 성공', token, user: { id: user.id, nickname: user.nickname, email: user.email } });
   } catch (error) {
@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const { id, nickname, password } = req.body;
-    
+
     // 닉네임 변경
     if (nickname) {
       await pool.query('UPDATE users SET nickname = ? WHERE id = ?', [nickname, id]);
@@ -60,5 +60,18 @@ exports.updateUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '회원정보 수정 실패' });
+  }
+};
+
+// 회원 탈퇴
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.body;
+    // ON DELETE CASCADE 설정이 되어 있다면 users 테이블에서 삭제 시 연관 데이터 자동 삭제됨
+    await pool.query('DELETE FROM users WHERE id = ?', [id]);
+    res.json({ message: '회원 탈퇴가 완료되었습니다.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '회원 탈퇴 실패' });
   }
 };
