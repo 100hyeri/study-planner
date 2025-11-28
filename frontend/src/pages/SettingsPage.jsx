@@ -65,6 +65,7 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
         }
     };
 
+    // 회원 탈퇴
     const handleDeleteAccount = async () => {
         if (window.confirm('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.')) {
             try {
