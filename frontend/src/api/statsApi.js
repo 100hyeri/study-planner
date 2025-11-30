@@ -1,6 +1,7 @@
-const BASE_URL = 'http://localhost:8080/api/stats';
+const SERVER_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const BASE_URL = `${SERVER_URL}/api/auth`;
 
-// [수정] period: 'weekly' | 'monthly'
+// period: 'weekly' | 'monthly'
 export const getWeeklyStats = async (userId, period = 'weekly') => {
   try {
     const response = await fetch(`${BASE_URL}?userId=${userId}&period=${period}`);
@@ -12,7 +13,7 @@ export const getWeeklyStats = async (userId, period = 'weekly') => {
   }
 };
 
-// [수정] period: 'weekly' | 'monthly'
+// period: 'weekly' | 'monthly'
 export const getCategoryStats = async (userId, period = 'weekly') => {
   try {
     const response = await fetch(`${BASE_URL}/category?userId=${userId}&period=${period}`);
@@ -23,7 +24,6 @@ export const getCategoryStats = async (userId, period = 'weekly') => {
   }
 };
 
-// ... (이하 기존 코드와 동일)
 export const getGoalHistory = async (userId) => {
   try {
     const response = await fetch(`${BASE_URL}/goals?userId=${userId}`);
@@ -83,7 +83,7 @@ export const saveDailyGoal = async (userId, isAchieved) => {
   } catch (error) { console.error('목표 저장 실패:', error); }
 };
 
-// [NEW] 진행 중인 최신 목표 가져오기
+// 진행 중인 최신 목표 가져오기
 export const getOngoingGoal = async (userId) => {
   try {
     // 전체 이력을 가져와서

@@ -4,13 +4,13 @@ import Header from '../components/layout/Header';
 import { updateUserInfo, deleteUserAccount } from '../api/authApi';
 import { getGoalHistory } from '../api/statsApi';
 
-const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onStatsClick }) => {
+const SettingsPage = ({ onBack, username, onLogout, userId = 1, onStatsClick }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState(''); // 'nickname' or 'password'
     const [inputValue, setInputValue] = useState('');
 
-    // 햑습 목표 기록을 JSON 파일로 백업
+    // 학습 목표 기록을 JSON 파일로 백업
     const handleBackup = async () => {
         if (window.confirm('나의 학습 목표 기록을 파일로 저장하시겠습니까?')) {
             try {

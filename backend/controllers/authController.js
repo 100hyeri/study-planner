@@ -32,7 +32,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user.id, nickname: user.nickname }, process.env.JWT_SECRET, { expiresIn: '12h' });
 
-    // [중요] id도 함께 반환하도록 수정됨
+    // id도 함께 반환하도록 수정됨
     res.json({ message: '로그인 성공', token, user: { id: user.id, nickname: user.nickname, email: user.email } });
   } catch (error) {
     console.error(error);

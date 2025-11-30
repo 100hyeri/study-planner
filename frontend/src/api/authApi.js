@@ -1,4 +1,5 @@
-const BASE_URL = 'http://localhost:8080/api/auth';
+const SERVER_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const BASE_URL = `${SERVER_URL}/api/auth`;
 
 export const loginUser = async (email, password) => {
   try {

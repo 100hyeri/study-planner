@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart2, Settings, LogOut } from 'lucide-react';
 
-const Header = ({ isGoalMode, onStatsClick, onSettingsClick, onLogoClick, username = 'tester', onLogout, isStatsPage = false, isSettingsPage = false }) => {
+const Header = ({ isGoalMode, onStatsClick, onSettingsClick, onLogoClick, username, onLogout, isStatsPage = false, isSettingsPage = false }) => {
   const headerClass = isGoalMode ? 'bg-[#1C1C1E] border-transparent shadow-md' : 'bg-white border-gray-100 shadow-sm';
   const titleClass = isGoalMode ? 'text-white' : 'text-gray-800';
   const textClass = isGoalMode ? 'text-[#A1A1AA]' : 'text-gray-600';

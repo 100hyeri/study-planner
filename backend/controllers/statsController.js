@@ -80,7 +80,6 @@ exports.getCategoryStats = async (req, res) => {
   }
 };
 
-// ... (나머지 함수들은 기존과 동일)
 // 3. 목표 이력 조회
 exports.getGoalHistory = async (req, res) => {
   try {
