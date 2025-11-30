@@ -1,5 +1,5 @@
 const SERVER_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const BASE_URL = `${SERVER_URL}/api/auth`;
+const BASE_URL = `${SERVER_URL}/api/stats`;
 
 // period: 'weekly' | 'monthly'
 export const getWeeklyStats = async (userId, period = 'weekly') => {
