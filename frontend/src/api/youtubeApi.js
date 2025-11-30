@@ -7,12 +7,15 @@ export const searchYoutubeVideos = async (query, maxResults = 10) => {
     return [];
   }
 
+  // snippet 파트를 요청하여 메타데이터 수신
   const searchUrl = `${BASE_URL}/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&maxResults=${maxResults}&key=${API_KEY}`;
   
   try {
     const response = await fetch(searchUrl);
     if (!response.ok) return [];
     const data = await response.json();
+
+    // UI 렌더링에 꼭 필요한 정보만 추출하여 리턴
     return data.items.map(item => ({
       videoId: item.id.videoId,
       title: item.snippet.title,

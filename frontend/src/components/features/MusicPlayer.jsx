@@ -1,38 +1,42 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Music, Volume2, VolumeX, Search, Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
-import { searchYoutubeVideos } from '../../api/youtubeApi'; 
+import { searchYoutubeVideos } from '../../api/youtubeApi';
 
 const MusicPlayer = ({ isGoalMode }) => {
   const [volume, setVolume] = useState(50);
   const [isMuted, setIsMuted] = useState(false);
   const [prevVolume, setPrevVolume] = useState(50);
   const [searchQuery, setSearchQuery] = useState('');
-  const [results, setResults] = useState([]); 
-  const [currentVideo, setCurrentVideo] = useState(null); 
+  const [results, setResults] = useState([]);
+  const [currentVideo, setCurrentVideo] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const playerRef = useRef(null); 
+  const playerRef = useRef(null); // 플레이어 인스턴스를 저장할 Ref 객체
   const progressInterval = useRef(null);
 
   useEffect(() => {
+    // YouTube IFrame API 스크립트가 로드되지 않았다면 동적으로 태그를 생성하여 로드
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
-      window.onYouTubeIframeAPIReady = () => {};
+      window.onYouTubeIframeAPIReady = () => { };
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     }
   }, []);
 
+  // 선택된 비디오가 변경될 때마다 플레이어를 생성하거나 영상을 로드
   useEffect(() => {
     if (currentVideo && window.YT) {
+      // 이미 플레이어가 생성되어 있다면, loadVideoById로 영상만 교체
       if (playerRef.current && playerRef.current.loadVideoById) {
         playerRef.current.loadVideoById(currentVideo.videoId);
         setIsPlaying(true);
       } else {
+        // 플레이어가 없다면 새로 생성
         createPlayer(currentVideo.videoId);
       }
     }
@@ -52,16 +56,18 @@ const MusicPlayer = ({ isGoalMode }) => {
     return () => clearInterval(progressInterval.current);
   }, [isPlaying]);
 
+  // 플레이어 생성 함수
   const createPlayer = (videoId) => {
     playerRef.current = new window.YT.Player('youtube-player-instance', {
       height: '100%', width: '100%', videoId: videoId,
+      // 플레이어 설정 : 자동 재생, 컨트롤 바 숨김 등 학습 방해 요소 최소화
       playerVars: { 'autoplay': 1, 'controls': 0, 'enablejsapi': 1, 'rel': 0, 'fs': 0 },
       events: {
         'onReady': (event) => { event.target.setVolume(volume); setIsPlaying(true); setDuration(event.target.getDuration()); },
         'onStateChange': (event) => {
           if (event.data === window.YT.PlayerState.PLAYING) setIsPlaying(true);
           if (event.data === window.YT.PlayerState.PAUSED) setIsPlaying(false);
-          if (event.data === window.YT.PlayerState.ENDED) { setIsPlaying(false); handleNext(); }
+          if (event.data === window.YT.PlayerState.ENDED) { setIsPlaying(false); handleNext(); } // 영상 종료 시 다음 곡 자동 재생
         }
       }
     });
@@ -149,7 +155,7 @@ const MusicPlayer = ({ isGoalMode }) => {
 
   return (
     <div className={`${containerClass} rounded-lg p-3 border shrink-0 w-full relative transition-all duration-500`}>
-      
+
       <div className="flex items-center gap-2 mb-2">
         <h3 className={`font-extrabold text-xs tracking-tight ${textClass}`}>오늘의 음악</h3>
         <Music size={12} className={iconClass} />
@@ -157,7 +163,7 @@ const MusicPlayer = ({ isGoalMode }) => {
           <button onClick={toggleMute} className={`${subTextClass} hover:text-white focus:outline-none`}>
             {isMuted || volume === 0 ? <VolumeX size={12} /> : <Volume2 size={12} />}
           </button>
-          <input 
+          <input
             type="range" min="0" max="100" value={volume} onChange={handleVolumeChange}
             className={`w-16 h-1 rounded-lg appearance-none cursor-pointer ${rangeClass}`}
           />
@@ -174,7 +180,7 @@ const MusicPlayer = ({ isGoalMode }) => {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                 <span className={`text-[9px] w-6 text-right shrink-0 ${subTextClass}`}>{formatDuration(currentTime)}</span>
-                <input 
+                <input
                   type="range" min="0" max={duration || 100} value={currentTime} onChange={handleSeek}
                   className={`flex-1 h-1 rounded-lg appearance-none cursor-pointer min-w-0 ${rangeClass}`}
                 />
@@ -194,12 +200,12 @@ const MusicPlayer = ({ isGoalMode }) => {
           <div className="relative">
             <div className="flex justify-between items-center mb-1">
               <span className={`text-[10px] ${subTextClass}`}>검색 결과 ({results.length})</span>
-              <button onClick={() => {setResults([]); setSearchQuery('');}} className={`${subTextClass} hover:text-red-500`}><X size={12} /></button>
+              <button onClick={() => { setResults([]); setSearchQuery(''); }} className={`${subTextClass} hover:text-red-500`}><X size={12} /></button>
             </div>
             <div className="max-h-32 overflow-y-auto custom-scrollbar pr-1 space-y-1">
               {results.map((video, index) => (
-                <div 
-                  key={video.videoId} 
+                <div
+                  key={video.videoId}
                   onClick={() => handleSelectVideo(video, index)}
                   className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer border border-transparent transition-all ${isGoalMode ? 'hover:bg-[#2C2C2E] hover:border-[#3B82F6]/50' : 'hover:bg-gray-50 hover:border-gray-100'}`}
                 >
@@ -216,7 +222,7 @@ const MusicPlayer = ({ isGoalMode }) => {
         ) : (
           <form onSubmit={handleSearch} className="mt-1">
             <div className="relative">
-              <input 
+              <input
                 type="text" placeholder="노래 검색" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full rounded-md px-3 py-2 text-xs focus:outline-none border transition-colors ${inputClass}`}
               />

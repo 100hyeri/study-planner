@@ -14,12 +14,16 @@ const SettingsPage = ({ onBack, username = 'tester', onLogout, userId = 1, onSta
     const handleBackup = async () => {
         if (window.confirm('나의 학습 목표 기록을 파일로 저장하시겠습니까?')) {
             try {
+                // 서버에서 최신 데이터 조회(비동기)
                 const data = await getGoalHistory(userId);
+                // 데이터를 JSON 문자열로 변환하고 Blob 객체 생성
                 const jsonString = JSON.stringify(data, null, 2);
                 const blob = new Blob([jsonString], { type: "application/json" });
+                // 가상의 다운로드 링크 생성 및 클릭 이벤트 트리거
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
                 link.href = url;
+                // 파일명에 날짜를 포함
                 link.download = `study_backup_${new Date().toISOString().slice(0, 10)}.json`;
                 document.body.appendChild(link);
                 link.click();

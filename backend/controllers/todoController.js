@@ -1,9 +1,10 @@
 const pool = require('../config/db');
 
-// [수정] 카테고리 자동 분류 (한글)
+// 정규표현식 활용 카테고리 자동 감지 로직
 const detectCategory = (text) => {
   if (!text) return '기타'; 
   const t = text.toLowerCase();
+  // 키워드 매칭
   if (t.match(/공부|수학|영어|코딩|과제|시험|독서|강의|study|read|learn/)) return '공부';
   if (t.match(/운동|헬스|산책|걷기|요가|수영|gym|run|walk/)) return '운동';
   if (t.match(/밥|식사|점심|저녁|아침|간식|물|meal|food|eat/)) return '식사';
@@ -32,8 +33,8 @@ exports.getTodos = async (req, res) => {
 exports.addTodo = async (req, res) => {
   try {
     const { userId, content, todoDate, category } = req.body;
+    // 클라이언트에서 카테고리를 지정하지 않아도 서버에서 자동 분류 수행
     const finalCategory = category || detectCategory(content);
-
     const [result] = await pool.query(
       'INSERT INTO todos (user_id, content, category, todo_date) VALUES (?, ?, ?, ?)',
       [userId, content, finalCategory, todoDate]

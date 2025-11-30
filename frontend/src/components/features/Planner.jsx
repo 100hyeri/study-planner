@@ -92,7 +92,7 @@ const Planner = ({ mode, goalInfo, isGoalMode, onDecreaseDDay, onGoalEnd, userId
       // D-day 도달 시 성공 처리
       if (currentDDay === 0) {
         if (userId) await updateGoalStatus(userId, 'success'); 
-        alert("목표를 달성하셨습니다! 정말 고생 많으셨어요 🎉");
+        alert("목표를 달성하셨습니다! 정말 고생 많으셨어요!!:>");
         if (onGoalEnd) onGoalEnd(); 
         return;
       } 
